@@ -85,6 +85,13 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		//此处会注册AnnotationConfigUtils中的几个对象到beanDefineMap里面，供初始创建使用
+		//[org.springframework.context.annotation.internalConfigurationAnnotationProcessor,
+		// org.springframework.context.event.internalEventListenerFactory,
+		// org.springframework.context.event.internalEventListenerProcessor,
+		// org.springframework.context.annotation.internalAutowiredAnnotationProcessor,
+		// org.springframework.context.annotation.internalCommonAnnotationProcessor,
+		// main]
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 

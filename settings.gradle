@@ -57,3 +57,4 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'example'

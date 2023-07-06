@@ -80,6 +80,17 @@ final class PostProcessorRegistrationDelegate {
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
+			//这里讲register类型的process和普通的process分开了
+			/**
+			 * BeanDefinitionRegistryPostProcessor功能如下：
+			 *
+			 * 1、因为实现了BeanFactoryPostProcessor接口，所以可以修改bean定义中属性，具体操作可以参照https://blog.csdn.net/lsq_401/article/details/105508535
+			 *
+			 * 2、还可以动态的添加bean到spring容器中
+			 * ————————————————
+			 * 版权声明：本文为CSDN博主「慕安凉」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+			 * 原文链接：https://blog.csdn.net/lsq_401/article/details/105517868
+			 */
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
@@ -109,6 +120,15 @@ final class PostProcessorRegistrationDelegate {
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
+			//其实主要是处理ConfigurationClassPostProcessor，它主要处理@Configuration类型，ConfigurationClassPostProcessor的来源是AnnotationConfigUtils
+			/**
+			 * 包含
+			 * full(完全版配置类)
+			 * 即带有@Configuration注解的配置类(忽略proxyBeanMethods特殊情况)
+			 * lite(精简版配置类)
+			 * 没有@Configuration注解，但有一些经常和该注解搭配的注解如@ComponentScan，@Import，@ImportResource，@Bean，这样的类相当于省略了@Configuration的精简版配置类，也会被视为配置类
+			 * 更重要的带有@Component的类也会被视为lite配置类，包括继承它的@Service，@Controller等
+			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry, beanFactory.getApplicationStartup());
 			currentRegistryProcessors.clear();
 

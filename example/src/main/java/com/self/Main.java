@@ -1,4 +1,4 @@
-package example.src.main.java.com.self;
+package com.self;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

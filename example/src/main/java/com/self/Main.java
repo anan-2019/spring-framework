@@ -1,9 +1,8 @@
 package com.self;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.retry.annotation.EnableRetry;
 
 /**
  * @ClassName Main
@@ -13,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Description Class Function Description Here
  */
 @SpringBootApplication
+@EnableRetry
 public class Main {
 //    private static Logger logger = LoggerFactory.getLogger(Main.class);
 

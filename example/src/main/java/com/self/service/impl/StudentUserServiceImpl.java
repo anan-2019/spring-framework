@@ -15,8 +15,9 @@ import org.springframework.stereotype.Service;
 @Service("userService")
 public class StudentUserServiceImpl implements User {
     private static Logger logger = LoggerFactory.getLogger(StudentUserServiceImpl.class);
+
 	public String print(String param){
 		System.out.println("测试成功");
-		return null;
+		return "ok";
 	}
 }

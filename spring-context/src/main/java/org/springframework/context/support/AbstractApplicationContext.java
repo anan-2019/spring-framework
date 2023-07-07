@@ -563,33 +563,45 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
-			//准备bean工厂，向其中填充bean
+			//准备bean工厂，向其中填充bean，主要是填充一些启动过程中需要的bean对象
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				//此处可以由子类进行对beanfactory进行前置处理，比如添加一些bpp
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 				// Invoke factory processors registered as beans in the context.
 				/**
 				 * 可以对BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor进行处理，
+				 *
 				 * ConfigurationClassPostProcessor（BeanDefinitionRegistryPostProcessor）是要被着重处理的一员，他可以加载bean定义，这个东西是最重要的一个processer，可以认为是个引导
 				 * 处理逻辑都是先PriorityOrdered 然后 Ordered 然后是其他的
 				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				/**
+				 * 这个是处理BeanPostProcessor的，也是先PriorityOrdered 然后 Ordered 然后是其他的
+				 */
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
+				/**
+				 * 处理国际化的
+				 */
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				//广播器
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				/**
+				 * SpringBoot内置的Tomcat或者UndertowWebServer就是在这里实例化的。
+				 */
 				onRefresh();
 
 				// Check for listener beans and register them.

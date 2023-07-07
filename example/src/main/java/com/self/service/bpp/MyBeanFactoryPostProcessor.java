@@ -1,4 +1,4 @@
-package example.src.main.java.com.self.config;
+package com.self.service.bpp;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;

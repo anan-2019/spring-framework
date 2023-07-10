@@ -528,6 +528,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			//处理InstantiationAwareBeanPostProcessor的实现类
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
 				return bean;
@@ -1788,15 +1789,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}, getAccessControlContext());
 		}
 		else {
+			/**
+			 * 这是一部分aware的处理逻辑，剩下的aware是由BeanPostProcessors进行处理的，也就是下面紧挨着的wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+			 * 如果bean实现了BeanNameAware 接口，则将 beanName设值进去
+			 * 如果bean实现了BeanClassLoaderAware接口，则将 ClassLoader 设值进去
+			 * 如果bean实现了BeanFactoryAware接口，则将 beanFactory 设值进去
+			 */
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			/**
+			 * 这里处理ApplicationContextAware这种的，这是重点处理各种aware的
+			 * 这里也是处理PostConstruct的地方，在InitDestroyAnnotationBeanPostProcessor中进行处理的
+			 */
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
+			/**
+			 * 先调用afterPropertiesSet，然后调用init-method方法
+			 */
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
@@ -1805,6 +1819,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			//这里处理BeanPostProcessors的后置处理
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 

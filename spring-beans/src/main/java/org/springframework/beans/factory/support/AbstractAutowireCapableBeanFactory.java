@@ -1809,7 +1809,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			/**
-			 * 先调用afterPropertiesSet，然后调用init-method方法
+			 * 先调用afterPropertiesSet（实现了InitializingBean接口），然后调用init-method方法
 			 */
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}

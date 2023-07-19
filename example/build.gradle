@@ -17,6 +17,8 @@ dependencies {
     implementation(project(':spring-aop'))
     implementation(project(':spring-aspects'))
 
+    implementation('org.apache.httpcomponents:httpclient:4.5.13')
+
     // 加密测试
     implementation('com.github.ulisesbocchio:jasypt-spring-boot-starter:1.18')
     // 使⽤新版本的加密库

@@ -2,8 +2,10 @@ package com.self.controller;
 
 import com.self.service.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @Classname ExampleController
@@ -14,11 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ExampleController1 {
 
+
 	@Autowired
-	User user;
+	RestTemplate restTemplate;
 
 	@GetMapping("/1")
 	public Object example(){
-		return user.print("");
+		ResponseEntity<String> forEntity = restTemplate.getForEntity("https://nones.xylink.com/project/#/workspace/home", String.class);
+		return forEntity;
 	}
 }

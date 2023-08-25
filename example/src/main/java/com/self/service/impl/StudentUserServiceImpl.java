@@ -3,6 +3,7 @@ package com.self.service.impl;
 import com.self.service.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class StudentUserServiceImpl implements User {
     private static Logger logger = LoggerFactory.getLogger(StudentUserServiceImpl.class);
 
+	@Cacheable(value = "test",key =  "'SDK:ENTERPRISE:TOKEN:' + #p0")
 	public String print(String param){
 		System.out.println("测试成功");
 		return "ok";

@@ -334,6 +334,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					beanCreation.tag("beanType", requiredType::toString);
 				}
 				// 根据beanName重新获取MergedBeanDefinition
+				// BeanDefinition 接口的实现类有很多，通过不同方式注册到 BeanDefinitionRegistry 中的 BeanDefinition 的类型可能都不太相同。
+				// 最终，在通过 BeanDefinition 来创建 bean 的实例时，通常都会调用 getMergedBeanDefinition 来获取到一个 RootBeanDefinition。
+				// 所以，RootBeanDefinition 本质上是 Spring 运行时统一的 BeanDefinition 视图。
+				// 对 BeanDefinition 进行 merge 操作时，会将 child 的属性与 parent 的属性进行合并，当有相同属性时，以 child 的为准。
+				//而类似 propertyValues、constructor args 这种集合类的参数属性的话，就会取并集。
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 

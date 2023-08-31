@@ -22,6 +22,7 @@ public class ExampleController1 {
 
 	@GetMapping("/1")
 	public Object example(){
+		
 		ResponseEntity<String> forEntity = restTemplate.getForEntity("https://nones.xylink.com/project/#/workspace/home", String.class);
 		return forEntity;
 	}

@@ -38,6 +38,12 @@ import org.springframework.lang.Nullable;
  *
  * <p>If used, this interceptor will normally be the first in the interceptor chain.
  *
+ * 意思就是 暴漏我们的通知器链对象MethodInvocation，保存在本地线程里
+ * 当我们需要的完整的调用上下文时，就可以ExposeInvocationInterceptor.currentInvocation()获取到
+ * 除非确实需要，否则不要使用此拦截器。
+ * 通常不了解SpringAOP，因为这会创建对SpringAPI的依赖，目标对象应尽可能是普通POJO。
+ * 如果使用，这个拦截器通常是拦截器链中的第一个
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */

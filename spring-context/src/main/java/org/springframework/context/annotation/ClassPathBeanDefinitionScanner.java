@@ -163,9 +163,13 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		this.registry = registry;
 
 		if (useDefaultFilters) {
+			//重点
+			//初始化包扫描默认的的过滤器 主要是@Component  JSR250 和 JSR-330
 			registerDefaultFilters();
 		}
+		//设置环境
 		setEnvironment(environment);
+		//设置资源加载
 		setResourceLoader(resourceLoader);
 	}
 
@@ -273,22 +277,34 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
+			/**
+			 * 1通过Resource查找类路径下面候选的类
+			 * 2.做一些基础的处理
+			 * 3.把处理完成的BeanDefinition注册到BeanFactory
+			 * 4.完成所有的类扫描
+			 */
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
+				//查看是否配置类是否指定bean的名称，如没指定则使用类名首字母小写
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				//TODO 处理lazy、Autowire、DependencyOn、initMethod、enforceInitMethod、destroyMethod、enforceDestroyMethod、Primary、Role、Description这些逻辑的
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				// 检查BeanDefinition是否存在：初次扫描到的肯定是不存在的
 				if (checkCandidate(beanName, candidate)) {
+					// 用BeanDefinitionHolder再次包装BeanDefinition
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					//检查scope是否创建，如未创建则进行创建
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					//2.3 注册BeanDefinition到BeanFactory的BeanDefinitionMap中。
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}

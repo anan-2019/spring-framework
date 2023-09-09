@@ -560,6 +560,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Tell the subclass to refresh the internal bean factory.
 			//主要用于自定义的applicationcontext的使用，类似new AnnotationConfigApplicationContext，这是springboot自己使用的，
 			// 就是在使用的时候可以自定义一些方法
+
+			/** 2、xml解析
+					* 	传统标签解析：bean、import等
+					* 	自定义标签解析 如：<context:component-scan base-package="com.xiangxue.jack"/>
+				* 	自定义标签解析流程：
+				* 		a、根据当前解析标签的头信息找到对应的namespaceUri
+					* 		b、加载spring所以jar中的spring.handlers文件。并建立映射关系
+					* 		c、根据namespaceUri从映射关系中找到对应的实现了NamespaceHandler接口的类
+					* 		d、调用类的init方法，init方法是注册了各种自定义标签的解析类
+					* 		e、根据namespaceUri找到对应的解析类，然后调用paser方法完成标签解析
+					*
+			* 3、把解析出来的xml标签封装成BeanDefinition对象
+					* */
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -663,6 +676,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		//校验xml配置文件
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -696,7 +710,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		// 关闭旧的 BeanFactory (如果有)，创建新的 BeanFactory，加载 Bean 定义、注册 Bean 等等
 		refreshBeanFactory();
+		// 返回刚刚创建的 BeanFactory
 		return getBeanFactory();
 	}
 

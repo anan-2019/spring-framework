@@ -1000,11 +1000,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
+		/**
+		 * 所有的BeanDefinition都会放在beanDefinitionMap变量中
+		 * 01 先判断是否已经存在 同名的BeanDefinition
+		 *  1.1 存在判断是否能覆盖
+		 *  1.2直接覆盖同名的Bean，不同类型也能覆盖
+		 * 02不存在同名的BeanDefinition
+		 * 	2.1直接放入beanDefinitionMap，beanDefinitionNames变量中
+		 * 	2.2清理缓存
+		 */
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
+			// 不允许覆盖，然后又重复扫描到了 -> 抛出异常
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
+			/**
+			 * 用框架定义的 Bean 覆盖用户自定义的 Bean
+			 * 这里看注释是这么翻译的，但是在实际SpringBoot项目中：
+			 * 如果没有手动disableAutoConfig 好像都是用户自定义的配置类覆盖了框架自动装配的。还得试验下。？？
+			 */
+
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isInfoEnabled()) {
@@ -1049,7 +1065,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.frozenBeanDefinitionNames = null;
 		}
-
+		// 处理缓存
 		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
 		}

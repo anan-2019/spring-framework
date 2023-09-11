@@ -2,15 +2,14 @@ package com.self.config;
 
 import com.self.model.Bar;
 import com.self.model.Foo;
-import com.self.service.Teacher;
-import com.self.service.User;
-import com.self.service.impl.StudentUserServiceImpl;
-import com.self.service.impl.TeacherImpl;
+import com.self.service.intercepts.TestIntercept;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * @ClassName Configuration
@@ -20,11 +19,18 @@ import org.springframework.context.annotation.Configuration;
  * @Description Class Function Description Here
  */
 @Configuration
-public class Configurations {
+public class Configurations extends WebMvcConfigurerAdapter {
     private static Logger logger = LoggerFactory.getLogger(Configurations.class);
 
     @Value("${server.port}")
     private int port;
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		//注册自己的拦截器并设置拦截的请求路径
+		registry.addInterceptor(new TestIntercept()).addPathPatterns("/**");
+		super.addInterceptors(registry);
+	}
 
 	@Bean
 	public Foo createFoo() {

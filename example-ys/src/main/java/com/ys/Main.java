@@ -1,7 +1,10 @@
 package com.ys;
 
+import com.ys.ioc.IocTestController;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @Classname ${NAME}
@@ -12,6 +15,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Main {
 	public static void main(String[] args) {
-		SpringApplication.run(Main.class, args);
+//		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:./springBean.xml");
+//		context.getBean("transactionManager");
+		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext("com.ys.ioc");
+		IocTestController bean = context1.getBean(IocTestController.class);
+//		SpringApplication.run(Main.class, args);
 	}
 }

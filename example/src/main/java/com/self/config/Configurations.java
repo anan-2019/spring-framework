@@ -5,11 +5,15 @@ import com.self.model.Foo;
 import com.self.service.intercepts.TestIntercept;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @ClassName Configuration
@@ -24,6 +28,14 @@ public class Configurations extends WebMvcConfigurerAdapter {
 
     @Value("${server.port}")
     private int port;
+
+	@Autowired
+	RestTemplate restTemplate;
+
+	@PostConstruct
+	public void test(){
+		System.out.println();
+	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {

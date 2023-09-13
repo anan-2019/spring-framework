@@ -170,6 +170,7 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				//注解类型的bean定义从这里进入
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				}
@@ -226,6 +227,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
+		//// 处理imported的情况,首先校验当前类是否被其他类通过@import注解注入了，如果注入了直接返回
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
 			if (configClass.isImported()) {
@@ -328,6 +330,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process default methods on interfaces
+		//接口中的default方法加了@Bean的话也得处理一下，也就是扫描它的bean定义
 		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
@@ -553,17 +556,22 @@ class ConfigurationClassParser {
 			Collection<SourceClass> importCandidates, Predicate<String> exclusionFilter,
 			boolean checkForCircularImports) {
 
+		//如果没有Import注解，就直接返回
 		if (importCandidates.isEmpty()) {
 			return;
 		}
 
+		//判断是否有递归Import
 		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
 		else {
+			// 如果有import注解，@import注解可以放入参数，参数为普通类，ImportSelector.class,ImportBeanDefinitionRegistrar.class
+			// ImportBeanDefinitionRegistrar这个类可以动态往BeanDefinitionMap中添加BeanDefinition。暴露了spring的BeanDefinitionMap，可以往里面动态添加
 			this.importStack.push(configClass);
 			try {
 				for (SourceClass candidate : importCandidates) {
+					//ImportSelector
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -577,11 +585,13 @@ class ConfigurationClassParser {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							//先找到所有要导入的类名称
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames, exclusionFilter);
 							processImports(configClass, currentSourceClass, importSourceClasses, exclusionFilter, false);
 						}
 					}
+					// ImportBeanDefinitionRegistrar动态添加BeanDefinition
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions

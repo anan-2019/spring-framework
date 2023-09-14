@@ -513,7 +513,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			initLookupPath(request);
 		}
 
-		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);//获取一个处理链，其实就是把handlMethod和intercepter放在一起
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Mapped to " + handler);

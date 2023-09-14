@@ -8,5 +8,5 @@ package com.self.service;
  * @Description Class Function Description Here
  */
 public interface User {
-	public String print(String param);
+	public Object print(String param);
 }

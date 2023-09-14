@@ -790,7 +790,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		checkRequest(request);
 
 		// Execute invokeHandlerMethod in synchronized block if required.
-		if (this.synchronizeOnSession) {
+		if (this.synchronizeOnSession) {//相同session中进行同步请求，这个基本上不会用到
 			HttpSession session = request.getSession(false);
 			if (session != null) {
 				Object mutex = WebUtils.getSessionMutex(session);
@@ -852,32 +852,32 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
-		ServletWebRequest webRequest = new ServletWebRequest(request, response);
+		ServletWebRequest webRequest = new ServletWebRequest(request, response); //将request和response包装成ServletWebRequest对象
 		try {
-			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
-			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
+			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);//返回Web数据绑定器工厂
+			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);//返回模型工厂
 
-			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);//返回调用方法
 			if (this.argumentResolvers != null) {
-				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);//设置方法参数解析器
 			}
 			if (this.returnValueHandlers != null) {
-				invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+				invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);//设置返回值处理器
 			}
-			invocableMethod.setDataBinderFactory(binderFactory);
-			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+			invocableMethod.setDataBinderFactory(binderFactory);//设置web数据绑定工厂
+			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);//设置对应的方法参数名发现器，就是用来查找方法的参数的名称的，因为jdk自带只会返回arg0
 
-			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
-			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
-			mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+			ModelAndViewContainer mavContainer = new ModelAndViewContainer();//创建模型视图容器
+			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));//设置input属性
+			modelFactory.initModel(webRequest, mavContainer, invocableMethod);//初始化模型
+			mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);//忽略重定向默认视图
 
-			AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-			asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+			AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);//创建异步请求
+			asyncWebRequest.setTimeout(this.asyncRequestTimeout);//设置对应的时间
 
-			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-			asyncManager.setTaskExecutor(this.taskExecutor);
-			asyncManager.setAsyncWebRequest(asyncWebRequest);
+			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);//异步请求管理器
+			asyncManager.setTaskExecutor(this.taskExecutor);//异步任务执行器
+			asyncManager.setAsyncWebRequest(asyncWebRequest);//设置异步请求
 			asyncManager.registerCallableInterceptors(this.callableInterceptors);
 			asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
@@ -892,7 +892,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
-			invocableMethod.invokeAndHandle(webRequest, mavContainer);
+			invocableMethod.invokeAndHandle(webRequest, mavContainer);//真正的调用处理
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
 			}

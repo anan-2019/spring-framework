@@ -4,6 +4,7 @@ import com.self.service.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @Classname ExampleController
@@ -20,5 +21,13 @@ public class ExampleController {
 	@GetMapping
 	public Object example(){
 		return user.print("");
+	}
+
+	@GetMapping("/model")
+	public Object model(){
+		ModelAndView model = new ModelAndView();
+		model.addObject("name","test");
+		model.setViewName("hello");
+		return model;
 	}
 }

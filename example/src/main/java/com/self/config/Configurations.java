@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import javax.annotation.PostConstruct;
 
@@ -42,6 +44,15 @@ public class Configurations extends WebMvcConfigurerAdapter {
 		//注册自己的拦截器并设置拦截的请求路径
 		registry.addInterceptor(new TestIntercept()).addPathPatterns("/**");
 		super.addInterceptors(registry);
+	}
+
+	@Override
+	public void configureViewResolvers(ViewResolverRegistry registry) {
+		InternalResourceViewResolver internalResourceViewResolver = new InternalResourceViewResolver();
+		internalResourceViewResolver.setPrefix("/");
+		internalResourceViewResolver.setSuffix(".jsp");
+		registry.viewResolver(internalResourceViewResolver);
+		super.configureViewResolvers(registry);
 	}
 
 	@Bean

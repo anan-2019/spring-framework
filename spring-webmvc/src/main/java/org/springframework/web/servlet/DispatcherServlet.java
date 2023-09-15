@@ -592,7 +592,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		//是否获取所有的Mapping
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
-			//从容器中获取所有的Mapping
+			//从容器中获取所有的Mapping，mapping和adapter加载是在org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {

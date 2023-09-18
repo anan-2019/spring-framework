@@ -1,6 +1,7 @@
 package com.self.service.applicationcontext;
 
 import com.self.service.applicationcontext.HelloService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class Child {
 	

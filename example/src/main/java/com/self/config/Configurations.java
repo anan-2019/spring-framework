@@ -36,7 +36,10 @@ public class Configurations extends WebMvcConfigurerAdapter {
 
 	@PostConstruct
 	public void test(){
-		System.out.println();
+		System.out.println("=================");
+		System.out.println("=================");
+		System.out.println("=================");
+		System.out.println(port);
 	}
 
 	@Override

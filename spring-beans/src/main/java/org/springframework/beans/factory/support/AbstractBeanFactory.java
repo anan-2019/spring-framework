@@ -370,6 +370,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				//单例模式创建
 				// Create bean instance.
 				if (mbd.isSingleton()) {
+					//创建完成后会将beanName保存到singletonObjects缓存中，并且清理掉二级和三级缓存中的对象
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							return createBean(beanName, mbd, args);

@@ -225,6 +225,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				//标记bean正在创建，方便在创建的时候直接加入三级缓存
 				beforeSingletonCreation(beanName);
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
@@ -255,9 +256,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
+					//清理掉bean正在创建的标记
 					afterSingletonCreation(beanName);
 				}
 				if (newSingleton) {
+					//添加到一级缓存，将二级和三级缓存中的数据对应清理
 					addSingleton(beanName, singletonObject);
 				}
 			}

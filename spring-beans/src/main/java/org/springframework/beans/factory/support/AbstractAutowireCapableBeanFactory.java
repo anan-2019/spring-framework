@@ -659,8 +659,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (earlySingletonExposure) {
+			//如果是早期暴露的bean
 			Object earlySingletonReference = getSingleton(beanName, false);
+			//如果从一级二级缓存中能找到对应的bean，为啥存在这种情况，是因为本bean和其他的bean循环依赖
 			if (earlySingletonReference != null) {
+				//在循环依赖的场景下，由于exposedObject是在initializeBean之前已经完成代理创建的所以是一致的
 				if (exposedObject == bean) {
 					exposedObject = earlySingletonReference;
 				}

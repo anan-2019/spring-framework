@@ -39,7 +39,6 @@ public class Configurations extends WebMvcConfigurerAdapter {
 		System.out.println("=================");
 		System.out.println("=================");
 		System.out.println("=================");
-		System.out.println(port);
 	}
 
 	@Override

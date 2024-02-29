@@ -3,6 +3,9 @@ package com.self;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
 
 /**
@@ -15,6 +18,9 @@ import org.springframework.retry.annotation.EnableRetry;
 @SpringBootApplication
 @EnableRetry
 @EnableEncryptableProperties
+@EnableCaching
+@ImportResource({"classpath:main.xml"})
+@PropertySource("classpath:settings.properties")
 public class Main {
 //    private static Logger logger = LoggerFactory.getLogger(Main.class);
 

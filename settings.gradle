@@ -40,8 +40,6 @@ rootProject.name = "spring"
 rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"
 }
-include 'example'
-
 
 settings.gradle.projectsLoaded {
 	gradleEnterprise {
@@ -58,3 +56,6 @@ settings.gradle.projectsLoaded {
 	}
 }
 include 'example'
+include 'example-ys'
+include 'example-xk'
+

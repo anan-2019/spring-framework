@@ -1000,11 +1000,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
+		/**
+		 * 所有的BeanDefinition都会放在beanDefinitionMap变量中
+		 * 01 先判断是否已经存在 同名的BeanDefinition
+		 *  1.1 存在判断是否能覆盖
+		 *  1.2直接覆盖同名的Bean，不同类型也能覆盖
+		 * 02不存在同名的BeanDefinition
+		 * 	2.1直接放入beanDefinitionMap，beanDefinitionNames变量中
+		 * 	2.2清理缓存
+		 */
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
+			// 不允许覆盖，然后又重复扫描到了 -> 抛出异常
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
+			/**
+			 * 用框架定义的 Bean 覆盖用户自定义的 Bean
+			 * 这里看注释是这么翻译的，但是在实际SpringBoot项目中：
+			 * 如果没有手动disableAutoConfig 好像都是用户自定义的配置类覆盖了框架自动装配的。还得试验下。？？
+			 */
+
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isInfoEnabled()) {
@@ -1049,7 +1065,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.frozenBeanDefinitionNames = null;
 		}
-
+		// 处理缓存
 		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
 		}
@@ -1320,22 +1336,31 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {
+			// 只有ShortcutDependencyDescriptor实现了resolveShortcut方法，返回了非空值。
+			// 目前版本代码只在AutowiredFieldElement、AutowiredMethodElement类中使用到，也即是说，
+			// 只有解析@Autowired、@Value注解的元素才会用到，目的是为了将解析结果缓存起来，避免重复解析
 			Object shortcut = descriptor.resolveShortcut(this);
 			if (shortcut != null) {
 				return shortcut;
 			}
 
+			//获取依赖的对象的类型，比如是个list
 			Class<?> type = descriptor.getDependencyType();
+			// 处理@Value注解，取值注解中的value属性中的值(原样，未经过解析的)，如果descriptor未被@Value标注，则返回null
+			// 注：从此处可知，@Value注解的优先级较高，只要找到了就处理，不再往下走
 			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 			if (value != null) {
 				if (value instanceof String) {
+					// 处理占位符如${}，做占位符的替换(不解析SP EL表达式)，此处获取:后面的默认值
 					String strVal = resolveEmbeddedValue((String) value);
 					BeanDefinition bd = (beanName != null && containsBean(beanName) ?
 							getMergedBeanDefinition(beanName) : null);
+					// 解析SP EL(如#{})
 					value = evaluateBeanDefinitionString(strVal, bd);
 				}
 				TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 				try {
+					// 类型转换，把解析出来的结果转成type类型
 					return converter.convertIfNecessary(value, type, descriptor.getTypeDescriptor());
 				}
 				catch (UnsupportedOperationException ex) {
@@ -1346,11 +1371,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 
+			/**
+			 * 1. array
+			 * 2. Collection及其子类
+			 * 3. Map
+			 */
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;
 			}
 
+			// 代码走到此处，说明依赖的是非"集合类"，
+			// 查找所有类型为type的实例，存放在matchingBeans <beanName, bean>
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (isRequired(descriptor)) {
@@ -1362,9 +1394,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String autowiredBeanName;
 			Object instanceCandidate;
 
+			// 如果找到多个元素，Spring要按一定的机制进行挑选，如果不满足规则可能需要抛出异常
 			if (matchingBeans.size() > 1) {
+				// 按以下顺序，找到符合条件的就直接返回
+				// 1. 挑选出被标识为primary的bean
+				// 2. 挑选标识了@Priority，且先级级最高的bean。可以不标识，一旦标识，不允许同一优先级的存在
+				// 3. fallback，依赖的名称与matchingBeans中任意一Key匹配
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
+					// 非集合类，找到了多个符合条件的Bean，抛出异常
 					if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {
 						return descriptor.resolveNotUnique(descriptor.getResolvableType(), matchingBeans);
 					}

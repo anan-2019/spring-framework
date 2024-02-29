@@ -1,8 +1,10 @@
 package com.self.service.aop;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +23,13 @@ public class LogAop {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogAop.class);
 
-	@Pointcut("execution(* com.self.service.impl.*.*(..))")
+	@Pointcut("execution(* com.self.service.impl.*.*(..)) || execution(public String com.self.model.GirlFriend.getName(..))")
 	public void point(){}
+
+	@Before("point()")
+	public void invokeBefore(JoinPoint point) throws Throwable {
+		logger.info("before to invoke :{}", point.getSignature().getName());
+	}
 
 	@Around("point()")
 	public Object invoke(ProceedingJoinPoint point) throws Throwable {

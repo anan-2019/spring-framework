@@ -589,8 +589,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
 
+		//是否获取所有的Mapping
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			//从容器中获取所有的Mapping，mapping和adapter加载是在org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
@@ -601,6 +603,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
+				//只获取指定名称的Mapping
 				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
@@ -612,6 +615,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings == null) {
+			//从配置文件中获取Mapping，这个配置文件是spring自带的
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No HandlerMappings declared for servlet '" + getServletName() +
@@ -631,6 +635,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Initialize the HandlerAdapters used by this class.
 	 * <p>If no HandlerAdapter beans are defined in the BeanFactory for this namespace,
 	 * we default to SimpleControllerHandlerAdapter.
+	 * //这个的获取和Mapping的如出一辙，不再赘述
 	 */
 	private void initHandlerAdapters(ApplicationContext context) {
 		this.handlerAdapters = null;
@@ -670,6 +675,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Initialize the HandlerExceptionResolver used by this class.
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * we default to no exception resolver.
+	 * 如出一辙
 	 */
 	private void initHandlerExceptionResolvers(ApplicationContext context) {
 		this.handlerExceptionResolvers = null;
@@ -1045,6 +1051,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
+				//根据request查找符合request的handler，其实是从handlerMappings中进行获取的，
+				// handlerMappings中有很多handlerMapping，根据不同的handlerMapping匹配规则确定当前的handlerMapping是否适合当前的request，
+				// 只要找到一个就返回，返回是个执行器链，其中包含了handler(处理这个请求的方法)和intercepters（一系列的拦截器）
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1052,6 +1061,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				//根据handler去获取一个adapter，为啥需要adapter，因为dispatcher处理的时候只有一个方法是ha.handle,但是handler可能是千奇百怪的方法，所以需要一个转接
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -1064,18 +1074,22 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				//处理prehandler，这个就是intercepter中pre的调用，处理方式值在chain中获取到intercepter数组，然后按照顺序进行执行调用，任何一个返回false就直接return
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				//真正的方法执行，也就是我们自己的业务逻辑，返回一个modelAndView
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
 					return;
 				}
 
+				//视图渲染
 				applyDefaultViewName(processedRequest, mv);
+				//执行postHandle
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1086,9 +1100,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			//异常分析，存在ModelAndView后调用render方法进行渲染，渲染完成后调用HandlerInterceptor拦截器的afterCompletion方法。
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
+			//触发afterCompletion
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		}
 		catch (Throwable err) {

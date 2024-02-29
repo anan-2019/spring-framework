@@ -134,12 +134,14 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
+		//在方法上找
 		Collection<CacheOperation> opDef = findCacheOperations(specificMethod);
 		if (opDef != null) {
 			return opDef;
 		}
 
 		// Second try is the caching operation on the target class.
+		//在类上找
 		opDef = findCacheOperations(specificMethod.getDeclaringClass());
 		if (opDef != null && ClassUtils.isUserLevelMethod(method)) {
 			return opDef;
@@ -147,11 +149,13 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
+			//在接口方法上找
 			opDef = findCacheOperations(method);
 			if (opDef != null) {
 				return opDef;
 			}
 			// Last fallback is the class of the original method.
+			//在接口上找
 			opDef = findCacheOperations(method.getDeclaringClass());
 			if (opDef != null && ClassUtils.isUserLevelMethod(method)) {
 				return opDef;

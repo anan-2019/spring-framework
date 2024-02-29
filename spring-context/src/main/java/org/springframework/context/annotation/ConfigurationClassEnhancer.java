@@ -119,11 +119,17 @@ class ConfigurationClassEnhancer {
 	 */
 	private Enhancer newEnhancer(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
+		// 当前类设置为父类
 		enhancer.setSuperclass(configSuperClass);
+		// 增强接口EnhancedConfiguration，EnhancedConfiguration继承BeanFactoryAware接口，可以调用setBeanFactory方法，BeanFactory用于获取bean，只返回同一个对象
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+		//BeanFactoryAwareGeneratorStrategy一个生成策略
+		// 生成cglib代理类，定义一个$$beanFactory类型用于存放环境中的beanfactory
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
+		// 			new BeanMethodInterceptor(),判断容器是否有bean，有就从容器获取返回，没得就new，保证bean的单例
+		//			new BeanFactoryAwareMethodInterceptor(),
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
@@ -284,7 +290,9 @@ class ConfigurationClassEnhancer {
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
 					MethodProxy cglibMethodProxy) throws Throwable {
 
+			// 获取beanfactory
 			ConfigurableBeanFactory beanFactory = getBeanFactory(enhancedConfigInstance);
+			//获取bean的名称
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
 			// Determine whether this bean is a scoped-proxy
@@ -302,6 +310,7 @@ class ConfigurationClassEnhancer {
 			// proxy that intercepts calls to getObject() and returns any cached bean instance.
 			// This ensures that the semantics of calling a FactoryBean from within @Bean methods
 			// is the same as that of referring to a FactoryBean within XML. See SPR-6602.
+			// 判断返回的bean是不是factorybean，根据从beanfactory取&beanname,能取得就算factorybean
 			if (factoryContainsBean(beanFactory, BeanFactory.FACTORY_BEAN_PREFIX + beanName) &&
 					factoryContainsBean(beanFactory, beanName)) {
 				Object factoryBean = beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
@@ -310,6 +319,7 @@ class ConfigurationClassEnhancer {
 				}
 				else {
 					// It is a candidate FactoryBean - go ahead with enhancement
+					// 又进行一层代理，因为factory的getobject方法又要new一个对象，这里只有再加一层代理从beanfactory获取，而不是新new违反单例
 					return enhanceFactoryBean(factoryBean, beanMethod.getReturnType(), beanFactory, beanName);
 				}
 			}

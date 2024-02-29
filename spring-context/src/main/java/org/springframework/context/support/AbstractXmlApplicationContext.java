@@ -90,7 +90,9 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 
 		// Allow a subclass to provide custom initialization of the reader,
 		// then proceed with actually loading the bean definitions.
+		//给子类实现（没有使用）
 		initBeanDefinitionReader(beanDefinitionReader);
+		//加载bean定义
 		loadBeanDefinitions(beanDefinitionReader);
 	}
 
@@ -125,6 +127,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 		}
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
+			//经过参数转化 最终调用reader.loadBeanDefinitions(configResources);
 			reader.loadBeanDefinitions(configLocations);
 		}
 	}

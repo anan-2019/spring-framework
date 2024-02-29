@@ -133,6 +133,8 @@ public abstract class AnnotationConfigUtils {
 	 * Register all relevant annotation post processors in the given registry.
 	 * @param registry the registry to operate on
 	 */
+	//AnnotationConfigServletWebServerApplicationContext 构造函数
+	//					====> AnnotatedBeanDefinitionReader 构造函数
 	public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
 		registerAnnotationConfigProcessors(registry, null);
 	}
@@ -145,6 +147,7 @@ public abstract class AnnotationConfigUtils {
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
 	 */
+	//把所有相关的注解bean factory/bean post processor注册到指定的bean registry
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
@@ -163,12 +166,20 @@ public abstract class AnnotationConfigUtils {
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
+			/**
+			 * 注册处理 {@link Configuration} 后置处理器
+			 */
+			// ConfigurationClassPostProcessor 是一个 BeanDefinitionRegistryPostProcessor，这个就牛皮了吗，处理了一堆东西，详情请看ConfigurationClassPostProcessor
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			/**
+			 * 注册处理 {@link Autowired} 后置处理器
+			 */
+			// AutowiredAnnotationBeanPostProcessor 是一个 BeanPostProcessor,处理Autowired和Value的
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
@@ -176,10 +187,15 @@ public abstract class AnnotationConfigUtils {
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
+			/**
+			 * 注册处理 {@link Required} 后置处理器
+			 */
+			// CommonAnnotationBeanPostProcessor 是一个 BeanPostProcessor，处理PostConstruct,PreDestroy和Resource
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
 		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		//是Spring提供的用于处理注解@PersistenceUnit和@PersistenceContext的BeanPostProcessor。用于注入相应的JPA资源:EntityManagerFactory和EntityManager (或者它们的子类变量)。
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {
@@ -230,6 +246,11 @@ public abstract class AnnotationConfigUtils {
 		}
 	}
 
+	//该方法应用时机: 容器启动过程中
+	//容器启动过程中 :
+	//ConfigurationClassBeanDefinitionReader#loadBeanDefinitionsForBeanMethod
+	//AnnotatedBeanDefinitionReader#doRegisterBean
+	//	将注解元数据信息中Bean定义相关的通用属性应用到BeanDefinitaion上
 	public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
 		processCommonDefinitionAnnotations(abd, abd.getMetadata());
 	}

@@ -143,7 +143,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
-		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
+		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);//获取方法参数
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
@@ -202,7 +202,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (KotlinDetector.isSuspendingFunction(method)) {
 				return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 			}
-			return method.invoke(getBean(), args);
+			return method.invoke(getBean(), args);//执行业务方法
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(method, getBean(), args);

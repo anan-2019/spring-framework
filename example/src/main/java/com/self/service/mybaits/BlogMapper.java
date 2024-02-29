@@ -12,6 +12,8 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface BlogMapper {
-	@Select("select * from blog where id = #{id}")
+	@Select({"select * from blog where id = #{id} limit 0,1"})
 	Blog login(Long id);
+	@Select({"select * from blog where id = #{id}"})
+	Blog testLogin1(Long id);
 }

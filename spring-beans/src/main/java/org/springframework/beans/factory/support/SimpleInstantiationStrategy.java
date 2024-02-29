@@ -88,6 +88,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		}
 		else {
 			// Must generate CGLIB subclass.
+			// 如果存在@Lookup，生成一个代理对象
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
 	}

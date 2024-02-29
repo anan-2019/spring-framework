@@ -19,7 +19,7 @@ public class AutowireCapableBeanFactoryTest {
         // 我们吧Child的创建过程都交给Bean工厂去帮我们处理，自己连new都不需要了 （createBean方法执行多次，就会创建多个child实例）
         Child child = (Child) autowireCapableBeanFactory.createBean(Child.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 
-        //简直残暴，没有@Autowired注解都给注入进来了~~~
+        //没有@Autowired注解都给注入进来了~~~
         System.out.println(child.getHelloService()); //HelloServiceImpl@6a78afa0
         System.out.println(child);
 

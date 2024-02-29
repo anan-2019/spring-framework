@@ -23,7 +23,7 @@ public class LogAop {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogAop.class);
 
-	@Pointcut("execution(* com.self.service.impl.*.*(..))")
+	@Pointcut("execution(* com.self.service.impl.*.*(..)) || execution(public String com.self.model.GirlFriend.getName(..))")
 	public void point(){}
 
 	@Before("point()")

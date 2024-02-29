@@ -12,6 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HelloServiceImpl implements HelloService{
-	@Autowired
-	User user;
+//	@Autowired
+//	User user;
 }
